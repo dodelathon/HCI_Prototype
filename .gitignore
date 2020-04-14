@@ -353,5 +353,6 @@ MigrationBackup/
 
 #Extra stuff
 *.bin
-metadata/
+metadata/*
+temp/
 # End of https://www.gitignore.io/api/visualstudio
