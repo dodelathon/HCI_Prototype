@@ -41,9 +41,14 @@ public class GameController : MonoBehaviour
 
     private void Update()
     {
-        if(SceneManager.GetActiveScene().name.Equals("Perf_Menu") && bob == false)
+        if (SceneManager.GetActiveScene().name.Equals("Perf_Menu") && bob == false)
         {
             FillChallenges();
+            bob = true;
+        }
+        else if (SceneManager.GetActiveScene().name.Equals("Leaderboard_Menu") && bob == false)
+        {
+            FillLeaderboard();
             bob = true;
         }
     }
@@ -52,7 +57,7 @@ public class GameController : MonoBehaviour
     {
         GameObject[] objects = GameObject.FindGameObjectsWithTag("GameController");
         List<GameObject> temp = new List<GameObject>();
-        foreach(GameObject x in objects)
+        foreach (GameObject x in objects)
         {
             temp.Add(x);
         }
@@ -60,7 +65,7 @@ public class GameController : MonoBehaviour
 
         while (temp.Count > 1)
         {
-            if(temp[temp.Count - 1].GetComponent<GameController>().Registered_Name.Equals(""))
+            if (temp[temp.Count - 1].GetComponent<GameController>().Registered_Name.Equals(""))
             {
                 Destroy(temp[temp.Count - 1]);
                 temp.RemoveAt(temp.Count - 1);
@@ -70,19 +75,27 @@ public class GameController : MonoBehaviour
         temp[0].GetComponent<GameController>().bob = false;
     }
 
-    public void Reg(string uName, string pass)
+    public bool Reg(string uName, string pass)
     {
-        Registered_Name = uName;
-        Registered_Pass = pass;
-        Users.Add(uName, pass);
-        WriteUsers();
+        if (!Users.ContainsKey(uName))
+        {
+            Registered_Name = uName;
+            Registered_Pass = pass;
+            Users.Add(uName, pass);
+            WriteUsers();
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     public bool Login(string uName, string Pass)
     {
-        if(Users.ContainsKey(uName))
+        if (Users.ContainsKey(uName))
         {
-            if(Users[uName].Equals(Pass))
+            if (Users[uName].Equals(Pass))
             {
                 Registered_Name = uName;
                 Registered_Pass = Pass;
@@ -116,8 +129,8 @@ public class GameController : MonoBehaviour
 
         System.Random rand = new System.Random();
 
-        float x = ((float)rand.NextDouble()* (bottomright.transform.position.x - topleft.transform.position.x)) + topleft.transform.position.x;
-        float y = ((float)rand.NextDouble()* (topleft.transform.position.y - bottomright.transform.position.y)) + bottomright.transform.position.y;
+        float x = ((float)rand.NextDouble() * (bottomright.transform.position.x - topleft.transform.position.x)) + topleft.transform.position.x;
+        float y = ((float)rand.NextDouble() * (topleft.transform.position.y - bottomright.transform.position.y)) + bottomright.transform.position.y;
 
         GameButton.transform.position = new Vector3(x, y);
         GameButton.SetActive(true);
@@ -152,13 +165,13 @@ public class GameController : MonoBehaviour
         {
             string userspath = Path.Combine(path, "users.txt");
             var users = File.ReadLines(userspath);
-            foreach(string x in users)
+            foreach (string x in users)
             {
-                string [] temp = x.Split(':');
+                string[] temp = x.Split(':');
                 Users.Add(temp[0], temp[1]);
             }
         }
-        catch(IOException)
+        catch (IOException)
         {
             string userspath = Path.Combine(path, "users.txt");
             File.Create(userspath);
@@ -171,12 +184,12 @@ public class GameController : MonoBehaviour
         try
         {
             string temp = "";
-            foreach(KeyValuePair<string, string> x in conn.Users)
+            foreach (KeyValuePair<string, string> x in conn.Users)
             {
                 temp += x.Key + ":" + x.Value + "\n";
             }
             string userspath = Path.Combine(path, "users.txt");
-            FileStream file = File.Open(userspath,FileMode.Truncate);
+            FileStream file = File.Open(userspath, FileMode.Truncate);
             byte[] info = new UTF8Encoding(true).GetBytes(temp);
             file.Write(info, 0, info.Length);
             file.Close();
@@ -196,7 +209,7 @@ public class GameController : MonoBehaviour
             foreach (string x in users)
             {
                 string[] temp = x.Split(':');
-                Scores.Add(temp[0], new string[]{ temp[1], temp[2]} );
+                Scores.Add(temp[0], new string[] { temp[1], temp[2] });
             }
         }
         catch (IOException)
@@ -210,7 +223,7 @@ public class GameController : MonoBehaviour
     {
         try
         {
-            UnityEngine.Debug.Log("Write");;
+            UnityEngine.Debug.Log("Write"); ;
             string temp = "";
             foreach (KeyValuePair<string, string[]> x in Scores)
             {
@@ -224,7 +237,7 @@ public class GameController : MonoBehaviour
             file.Close();
             UnityEngine.Debug.Log("End");
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             UnityEngine.Debug.Log("Write Error:\n" + e.Message);
         }
@@ -232,21 +245,21 @@ public class GameController : MonoBehaviour
 
     public void ScoreAdder()
     {
-        
+
         if (!Scores.ContainsKey(Registered_Name))
         {
-            Scores.Add(Registered_Name, new string[]{diff + "", "Reaction"});
+            Scores.Add(Registered_Name, new string[] { diff + "", "Reaction" });
         }
         else
         {
-           Scores[Registered_Name] = new string[] { diff + "", "Reaction" };
+            Scores[Registered_Name] = new string[] { diff + "", "Reaction" };
         }
         WriteScores();
     }
 
     public void FillChallenges()
     {
-        UnityEngine.Debug.Log("Bob");
+        //UnityEngine.Debug.Log("Bob");
         GameController conn = GameObject.Find("GameController").GetComponent<GameController>();
         GameObject NameScroll = GameObject.Find("NameScroll");
         GameObject ScoreScroll = GameObject.Find("ScoreScroll");
@@ -262,13 +275,13 @@ public class GameController : MonoBehaviour
             {
                 ScoreTemp = x;
             }
-            else if(x.name.Equals("NameTemplate"))
+            else if (x.name.Equals("NameTemplate"))
             {
                 NameTemp = x;
             }
         }
 
-        foreach(KeyValuePair<string, string[]> x in conn.Scores)
+        foreach (KeyValuePair<string, string[]> x in conn.Scores)
         {
             if (x.Key.Equals(conn.Registered_Name))
             {
@@ -283,11 +296,44 @@ public class GameController : MonoBehaviour
                 tem.SetActive(true);
             }
         }
-
-
-
     }
 
+    public void FillLeaderboard()
+    {
+        //UnityEngine.Debug.Log("Bob");
+        GameController conn = GameObject.Find("GameController").GetComponent<GameController>();
+        GameObject NameScroll = GameObject.Find("NameScroll");
+        GameObject ScoreScroll = GameObject.Find("ScoreScroll");
+        GameObject NameContent = NameScroll.transform.Find("List_Mask").Find("List_Content").gameObject;
+        GameObject ScoreContent = ScoreScroll.transform.Find("List_Mask").Find("List_Content").gameObject;
+        GameObject NameTemp = null;
+        GameObject ScoreTemp = null;
 
+        GameObject[] temp = Resources.FindObjectsOfTypeAll<GameObject>();
+        foreach (GameObject x in temp)
+        {
+            if (x.name.Equals("ScoreTemplate"))
+            {
+                ScoreTemp = x;
+            }
+            else if (x.name.Equals("NameTemplate"))
+            {
+                NameTemp = x;
+            }
+        }
+
+        foreach (KeyValuePair<string, string[]> x in conn.Scores)
+        {
+            UnityEngine.Debug.Log(x.Value[0]);
+            UnityEngine.Debug.Log(path);
+            GameObject tempor = GameObject.Instantiate(NameTemp, NameContent.transform);
+            tempor.transform.Find("Text").gameObject.GetComponent<Text>().text = x.Key;
+            tempor.SetActive(true);
+            GameObject tem = GameObject.Instantiate(ScoreTemp, ScoreContent.transform);
+            tem.transform.Find("Text").gameObject.GetComponent<Text>().text = x.Value[1] + ":" + x.Value[0];
+            tem.SetActive(true);
+        }
+
+    }
 }
 

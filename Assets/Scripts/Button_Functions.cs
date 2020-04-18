@@ -89,8 +89,14 @@ public class Button_Functions : MonoBehaviour
             if (Pass.text.Equals(ConfPass.text))
             {
                 GameController conn = GameObject.Find("GameController").GetComponent<GameController>();
-                conn.Reg(UName.text, Pass.text);
-                ShowSucc();
+                if (conn.Reg(UName.text, Pass.text))
+                {
+                    ShowSucc();
+                }
+                else
+                {
+                    ShowTaken();
+                }
             }
             else
             {
@@ -135,6 +141,20 @@ public class Button_Functions : MonoBehaviour
         }
         Error.SetActive(true);
     }
+    
+    public void ShowTaken()
+    { 
+        GameObject[] temp = Resources.FindObjectsOfTypeAll<GameObject>();
+        GameObject Error = null;
+        foreach (GameObject x in temp)
+        {
+            if (x.name.Equals("ExError"))
+            {
+                Error = x;
+            }
+        }
+        Error.SetActive(true);
+    }
 
     public void ShowSucc()
     {
@@ -153,6 +173,12 @@ public class Button_Functions : MonoBehaviour
     public void HideError()
     {
         GameObject Error = GameObject.Find("RegError");
+        Error.SetActive(false);
+    }
+    
+    public void HideExError()
+    {
+        GameObject Error = GameObject.Find("ExError");
         Error.SetActive(false);
     }
 
